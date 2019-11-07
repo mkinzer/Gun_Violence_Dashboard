@@ -1,0 +1,12 @@
+name: GV_Dashboard
+title: GV_Dashboard
+username:
+account: rsh52
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 1352893
+bundleId: 2569996
+url: https://rsh52.shinyapps.io/GV_Dashboard/
+when: 1573088780.7134
+asMultiple: FALSE
+asStatic: FALSE
