@@ -314,23 +314,21 @@ Combined_Year <- combined_gv_df %>%
 
 # Note there is no new hampshire or hawaii in the dataset
 state_gv.df <- combined_gv_df %>% 
-  group_by(state) %>% 
+  group_by(state, date) %>% 
   tally()
+
+state_gv.df <- state_gv.df[!grepl(" Gardena", state_gv.df$state),]
+state_gv.df <- state_gv.df[!grepl("D.C.", state_gv.df$state),]
+state_gv.df <- state_gv.df[!grepl("DC", state_gv.df$state),]
+state_gv.df <- state_gv.df[!grepl("PUERTO RICO", state_gv.df$state),]
+
 state_gv.df <- as.data.frame(state_gv.df)
 state_gv.df$n <- as.integer(state_gv.df$n)
 state_gv.df$state <- as.character(state_gv.df$state)
-
-state_gv.df[54,] <- c(" DC", state_gv.df$n[9] + state_gv.df$n[10]) # Combine and format D.C. datapoints
-
-state_gv.df <- state_gv.df[c(-1),] # Remove Gardena
-state_gv.df <- state_gv.df[c(-8),] # Remove Duplicate DC
-state_gv.df <- state_gv.df[c(-8),] # Remove second duplicate DC
-state_gv.df <- state_gv.df[c(-37),] # Remove PR
-state_gv.df <- state_gv.df[c(-37),] # Remove Puerto Rico
-state_gv.df <- state_gv.df[1:(nrow(state_gv.df)-1),] # Removal of DC to help leaflet
+state_gv.df$date <- ymd(state_gv.df$date)
 
 state_gv.df$state <- substr(state_gv.df$state,2,3)
-names(state_gv.df) <- c("STATE_ABBR", "n")
+names(state_gv.df) <- c("STATE_ABBR", "date", "n")
 state_gv.df$n <- as.integer(state_gv.df$n) # redefine as an integer type
 
 # us.shp@data <-  data.frame(us.shp@data, state_gv.df[match(us.shp@data[,"STATE_ABBR"], state_gv.df[,"STATE_ABBR"]),])
@@ -352,7 +350,7 @@ state_gv.df$n <- as.integer(state_gv.df$n) # redefine as an integer type
 #             legend.bg.alpha = 0)
 
 
-# Attempting Normalzation -----
+# Attempting Normalization -----
 # State population from US Census Bureau July 1st 2018
 
 # http://web.mit.edu/11.520/www/labs/lab5/normalize.html
@@ -434,38 +432,38 @@ state_pop <- read.csv("US_Pop_Census_2018.csv")
 #             title = "Relative<br>Magnitude")
 
 # Highcharter Map --------------------------------------------------------------
-mapdata <- get_data_from_map(download_map_data("countries/us/us-all"))
+# mapdata <- get_data_from_map(download_map_data("countries/us/us-all"))
 
-GV_Count_high <- hcmap("countries/us/us-all", data = state_gv.df, value = "n",
-      joinBy = c("hc-a2", "STATE_ABBR"), name = "Gun Violence Incidence",
-      dataLabels = list(enabled = TRUE, format = '{point.name}'),
-      borderColor = "#FAFAFA", borderWidth = 0.1,
-      tooltip = list(valueDecimals = 0, valuePrefix = "", valueSuffix = "")) %>% 
-  hc_chart(zoomType = "xy") %>% 
-  hc_chart(backgroundColor = "white") %>% 
-  hc_legend(enabled = F) %>% 
-  # hc_add_theme(hc_theme_db()) %>% 
-  hc_title(text = "GVA Deaths In Mass Shootings: 2013 - 2019", align = "left", color = "white") %>% 
-  hc_exporting(enabled = TRUE, filename = "GV_Map") %>% 
-  hc_credits(enabled = TRUE, text = "Source: https://www.gunviolencearchive.org/, https://www.massshootingtracker.org/") %>% 
-  hc_colorAxis(minColor = "white", maxColor = "firebrick", type = "logarithmic")
-
-
-state_gv_norm.df <- merge.data.frame(x = state_gv.df, y = state_pop, by = "STATE_ABBR")
-state_gv_norm.df$Normalization <- (state_gv_norm.df$n/state_gv_norm.df$Population) * 100000
-
-
-GV_Norm_high <- hcmap("countries/us/us-all", data = state_gv_norm.df, value = "Normalization",
-                       joinBy = c("hc-a2", "STATE_ABBR"), name = "Gun Violence Incidence",
-                       dataLabels = list(enabled = TRUE, format = '{point.name}'),
-                       borderColor = "#FAFAFA", borderWidth = 0.1,
-                       tooltip = list(valueDecimals = 2, valuePrefix = "", valueSuffix = "")) %>% 
-  hc_chart(zoomType = "xy") %>% 
-  hc_chart(backgroundColor = "white") %>% 
-  hc_legend(enabled = F) %>% 
-  # hc_add_theme(hc_theme_db()) %>% 
-  hc_title(text = "GVA Deaths In Mass Shootings: 2013 - 2019", align = "left", color = "white") %>% 
-  hc_subtitle(text = "Population Normalized", align = "left", color = "white") %>% 
-  hc_exporting(enabled = TRUE, filename = "GV_Map") %>% 
-  hc_credits(enabled = TRUE, text = "Source: https://www.gunviolencearchive.org/, https://www.massshootingtracker.org/") %>% 
-  hc_colorAxis(minColor = "white", maxColor = "firebrick", type = "logarithmic")
+# GV_Count_high <- hcmap("countries/us/us-all", data = state_gv.df, value = "n",
+#       joinBy = c("hc-a2", "STATE_ABBR"), name = "Gun Violence Incidence",
+#       dataLabels = list(enabled = TRUE, format = '{point.name}'),
+#       borderColor = "#FAFAFA", borderWidth = 0.1,
+#       tooltip = list(valueDecimals = 0, valuePrefix = "", valueSuffix = "")) %>% 
+#   hc_chart(zoomType = "xy") %>% 
+#   hc_chart(backgroundColor = "white") %>% 
+#   hc_legend(enabled = F) %>% 
+#   # hc_add_theme(hc_theme_db()) %>% 
+#   hc_title(text = "GVA Deaths In Mass Shootings: 2013 - 2019", align = "left", color = "white") %>% 
+#   hc_exporting(enabled = TRUE, filename = "GV_Map") %>% 
+#   hc_credits(enabled = TRUE, text = "Source: https://www.gunviolencearchive.org/, https://www.massshootingtracker.org/") %>% 
+#   hc_colorAxis(minColor = "white", maxColor = "firebrick", type = "logarithmic")
+# 
+# 
+# # state_gv_norm.df <- merge.data.frame(x = state_gv.df, y = state_pop, by = "STATE_ABBR")
+# # state_gv_norm.df$Normalization <- (state_gv_norm.df$n/state_gv_norm.df$Population) * 100000
+# 
+# 
+# GV_Norm_high <- hcmap("countries/us/us-all", data = state_gv_norm.df, value = "Normalization",
+#                        joinBy = c("hc-a2", "STATE_ABBR"), name = "Gun Violence Incidence",
+#                        dataLabels = list(enabled = TRUE, format = '{point.name}'),
+#                        borderColor = "#FAFAFA", borderWidth = 0.1,
+#                        tooltip = list(valueDecimals = 2, valuePrefix = "", valueSuffix = "")) %>% 
+#   hc_chart(zoomType = "xy") %>% 
+#   hc_chart(backgroundColor = "white") %>% 
+#   hc_legend(enabled = F) %>% 
+#   # hc_add_theme(hc_theme_db()) %>% 
+#   hc_title(text = "GVA Deaths In Mass Shootings: 2013 - 2019", align = "left", color = "white") %>% 
+#   hc_subtitle(text = "Population Normalized", align = "left", color = "white") %>% 
+#   hc_exporting(enabled = TRUE, filename = "GV_Map") %>% 
+#   hc_credits(enabled = TRUE, text = "Source: https://www.gunviolencearchive.org/, https://www.massshootingtracker.org/") %>% 
+#   hc_colorAxis(minColor = "white", maxColor = "firebrick", type = "logarithmic")
