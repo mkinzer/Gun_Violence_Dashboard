@@ -157,7 +157,7 @@ all_years <- list(df2013, df2014, df2015, df2016, df2017, df2018, df2019)
 # Apply the rbind command to all elements of the list using do.call()
 total_gv_df <- do.call("rbind", all_years)
 
-# The current format of the date is an integer so conver it to a character
+# The current format of the date is an integer so convert it to a character
 # since this is a non-typical date setup
 total_gv_df$incident_date <- as.character(total_gv_df$incident_date)
 
@@ -165,9 +165,9 @@ total_gv_df$incident_date <- as.character(total_gv_df$incident_date)
 # then recombine into one column called "new_incident_date" via paste0
 # and define as a Date data type. Then change State names to abbreviations.
 total_gv_df$incident_date <- str_remove(string = total_gv_df$incident_date, pattern = ",")
-total_gv_df$month <- lapply(strsplit(as.character(total_gv_df$incident_date), split = " "),"[[",1)
-total_gv_df$day <- lapply(strsplit(as.character(total_gv_df$incident_date), split = " "),"[[",2)
-total_gv_df$year <- lapply(strsplit(as.character(total_gv_df$incident_date), split = " "),"[[",3)
+total_gv_df$month <- lapply(strsplit(as.character(total_gv_df$incident_date), split = " "),"[",1)
+total_gv_df$day <- lapply(strsplit(as.character(total_gv_df$incident_date), split = " "),"[",2)
+total_gv_df$year <- lapply(strsplit(as.character(total_gv_df$incident_date), split = " "),"[",3)
 total_gv_df$date <- paste0(total_gv_df$year, "-", total_gv_df$month, "-", total_gv_df$day)
 total_gv_df$date <- as.Date(total_gv_df$date, "%Y-%B-%d")
 total_gv_df$state <- state.abb[match(total_gv_df$state,state.name)] 
@@ -178,8 +178,6 @@ total_gv_df$no.injured <- as.integer(total_gv_df$no.injured)
 # Remove everything with and inside of parentheses to preserve consistency when 
 # joining with the MST database.
 total_gv_df$city_county <- gsub("\\s*\\([^\\)]+\\)","",as.character(total_gv_df$city_county)) 
-         
-hchart(mpg, "scatter", hcaes(x = displ, y = hwy, group = class))
 
 GVA_Month <- total_gv_df %>%
   dplyr::select(date, no.killed) %>%
@@ -271,20 +269,20 @@ GVA_Year <- total_gv_df %>%
 dfmass <- read.csv("dfmass.csv", fileEncoding = "latin1")
 dfmass$date <- mdy(dfmass$date)
 
-MassST_Year <- dfmass %>% 
-  dplyr::select(date, no.killed) %>% 
-  group_by(Date = floor_date(x = date, unit = "year")) %>% 
-  tally(name = "Number of Deaths") %>% 
-  ggplot(aes(x = Date, y = `Number of Deaths`)) + geom_col(aes(fill = `Number of Deaths`)) +
-  scale_fill_gradient(low = "blue", high = "red") +
-  theme_minimal() +
-  ggtitle("Number of Gun Related Deaths in Mass Shootings Over Time") +
-  labs(caption = "Source: https://www.massshootingtracker.org/")
+# MassST_Year <- dfmass %>% 
+#   dplyr::select(date, no.killed) %>% 
+#   group_by(Date = floor_date(x = date, unit = "year")) %>% 
+#   tally(name = "Number of Deaths") %>% 
+#   ggplot(aes(x = Date, y = `Number of Deaths`)) + geom_col(aes(fill = `Number of Deaths`)) +
+#   scale_fill_gradient(low = "blue", high = "red") +
+#   theme_minimal() +
+#   ggtitle("Number of Gun Related Deaths in Mass Shootings Over Time") +
+#   labs(caption = "Source: https://www.massshootingtracker.org/")
 
 
 # Combined GVA and MST Datasets ================================================
 
-combined_gv_df <- left_join(dfmass, total_gv_df,
+combined_gv_df <- right_join(dfmass, total_gv_df,
                           by = c("date", "city_county", "state", "no.injured", 
                                  "no.killed"))
 combined_gv_df <- data.frame(combined_gv_df$date, combined_gv_df$city_county, 
@@ -293,24 +291,15 @@ combined_gv_df <- data.frame(combined_gv_df$date, combined_gv_df$city_county,
 colnames(combined_gv_df) <- c("date", "city_county", "state", "no.injured", 
                               "no.killed")
 
-Combined_Year <- combined_gv_df %>% 
-  dplyr::select(date, no.killed) %>% 
-  group_by(Date = floor_date(x = date, unit = "year")) %>% 
-  tally(name = "Number of Deaths") %>% 
-  ggplot(aes(x = Date, y = `Number of Deaths`)) + geom_col(aes(fill = `Number of Deaths`)) +
-  scale_fill_gradient(low = "blue", high = "red") +
-  theme_minimal() +
-  ggtitle("Number of Gun Related Deaths in Mass Shootings Over Time")
+# Combined_Year <- combined_gv_df %>% 
+#   dplyr::select(date, no.killed) %>% 
+#   group_by(Date = floor_date(x = date, unit = "year")) %>% 
+#   tally(name = "Number of Deaths") %>% 
+#   ggplot(aes(x = Date, y = `Number of Deaths`)) + geom_col(aes(fill = `Number of Deaths`)) +
+#   scale_fill_gradient(low = "blue", high = "red") +
+#   theme_minimal() +
+#   ggtitle("Number of Gun Related Deaths in Mass Shootings Over Time")
 
-# tmap of totals  --------------------------------------------------------------
-
-# library(tmap)         # For creating tmap
-# library(tmaptools)    # For reading and processing spatial data related to tmap
-# library(dplyr)        # For data wrangling
-# library(sf)
-# library(raster)
-
-# us.shp <- shapefile("US_Shape_File/states.shp")
 
 # Note there is no new hampshire or hawaii in the dataset
 state_gv.df <- combined_gv_df %>% 
@@ -321,33 +310,16 @@ state_gv.df <- state_gv.df[!grepl(" Gardena", state_gv.df$state),]
 state_gv.df <- state_gv.df[!grepl("D.C.", state_gv.df$state),]
 state_gv.df <- state_gv.df[!grepl("DC", state_gv.df$state),]
 state_gv.df <- state_gv.df[!grepl("PUERTO RICO", state_gv.df$state),]
+state_gv.df <- na.omit(state_gv.df)
 
 state_gv.df <- as.data.frame(state_gv.df)
 state_gv.df$n <- as.integer(state_gv.df$n)
 state_gv.df$state <- as.character(state_gv.df$state)
 state_gv.df$date <- ymd(state_gv.df$date)
 
-state_gv.df$state <- substr(state_gv.df$state,2,3)
+# state_gv.df$state <- substr(state_gv.df$state,2,3)
 names(state_gv.df) <- c("STATE_ABBR", "date", "n")
 state_gv.df$n <- as.integer(state_gv.df$n) # redefine as an integer type
-
-# us.shp@data <-  data.frame(us.shp@data, state_gv.df[match(us.shp@data[,"STATE_ABBR"], state_gv.df[,"STATE_ABBR"]),])
-# 
-# GV_Total_tmap <- tm_shape(us.shp) +
-#   # tm_polygons("n") +
-#   tm_fill("n", title = "Total Recorded GV Incidents (n)", style = "fixed",
-#           breaks = seq(0,max(state_gv.df$n),length.out = 7),
-#           textNA = "No Record", 
-#           colorNA = "#808080",   # <-------- color for NA values
-#           palette = c("#fcf9bb", "#febb81", "#f4685c", "#bb3978", "#772181", "#2b105f", "#000005")) +
-#   tm_borders() +
-#   tm_layout("",
-#             legend.title.size = 1,
-#             legend.text.size = 0.6,
-#             legend.position = c("left","bottom"),
-#             legend.bg.color = "white",
-#             # legend.digits = 5,
-#             legend.bg.alpha = 0)
 
 
 # Attempting Normalization -----
@@ -358,112 +330,19 @@ state_gv.df$n <- as.integer(state_gv.df$n) # redefine as an integer type
 state_pop <- read.csv("US_Pop_Census_2018.csv")
 
 
-# us.shp@data <- data.frame(us.shp@data, state_pop[match(us.shp@data[,"STATE_NAME"], state_pop[,"State_Name"]),])
-# 
-# us.shp$Normalization <- (us.shp$n/us.shp$Population) * 100000
+# Victim Type Testing-----------------------------------------------------------
 
-# The below plot shows state population normalized gun violence incidence.
-# This is done by dividing the number gun violence incidents by the total
-# state population multiplied by 100,000. A value of 1 indiciates for a state
-# therefore indicates that for every 100,000 people in the state there will be
-# one gun violence indicent.
 
-# GV_Normal_tmap <- tm_shape(us.shp) +
-#   # tm_polygons("n") +
-#   tm_fill("Normalization", title = "Population Normalized GV Incidence per 100,000", style = "fixed",
-#           breaks = seq(0,max(us.shp$Normalization, na.rm = TRUE),length.out = 10),
-#           textNA = "No Record", 
-#           colorNA = "#808080",   # <-------- color for NA values
-#           palette = c("#ffffff", "#fcf2b4", "#fecd90", "#fc8a62", "#df4b67", "#b4367a", "#7e2482", "#55177d", "#190f3c", "#000003")) +
-#   tm_borders() +
-#   tm_layout("",
-#             legend.title.size = 1,
-#             legend.text.size = 0.5,
-#             legend.position = c("left","bottom"),
-#             legend.bg.color = "white",
-#             # legend.digits = 5,
-#             legend.bg.alpha = 0)
+us_gv.df <- combined_gv_df[!grepl(" Gardena", combined_gv_df$state),]
+us_gv.df <- us_gv.df[!grepl("D.C.", us_gv.df$state),]
+us_gv.df <- us_gv.df[!grepl("DC", us_gv.df$state),]
+us_gv.df <- us_gv.df[!grepl("PUERTO RICO", us_gv.df$state),]
+us_gv.df <- na.omit(us_gv.df)
 
-# Leaflet Interactivity --------------------------------------------------------
-# library(leaflet)
-# gv_palette <- colorBin("YlOrRd", domain = us.shp$Normalization, bins = 15, na.color = "#808080")
-# 
-# border_opacity <- as.numeric(us.shp$Normalization >= quantile(us.shp$Normalization, .75, na.rm = TRUE))
-# border_opacity[is.na(border_opacity)] <- 0
-# 
-# labels <- sprintf(
-#   "<strong>%s</strong><br/>
-#   Number of GV Incidents: %g <br/>
-#   GV Density: %g <br/>
-#   State Population (2018, per 1,000): %g",
-#   us.shp$STATE_NAME,
-#   us.shp$n,
-#   round(us.shp$Normalization, 2),
-#   round(us.shp$Population/1000,0)
-# ) %>% lapply(htmltools::HTML)
-# 
-# GV_Normal_leaf <- leaflet(us.shp) %>%
-#   setView(lng = -100,
-#           lat = 40,
-#           zoom = 3) %>%
-#   addPolygons(
-#     data = us.shp,
-#     fillColor = ~gv_palette(us.shp@data$Normalization),
-#     weight = 1,  # border thickness
-#     opacity = 1, # border opacity
-#     color = "white", # border color
-#     fillOpacity = 1,
-#     label = labels) %>% 
-#   addPolygons(
-#     fillOpacity = 0,
-#     color = "red",
-#     opacity = border_opacity,
-#     weight = 2,
-#     label = labels,
-#     labelOptions = labelOptions(
-#       style = list("font-weight" = "normal", padding = "3px 8px"),
-#       textsize = "15px",
-#       direction = "auto")) %>% 
-#   addLegend(position = 'topleft', 
-#             pal =  colorBin("YlOrRd", domain = us.shp$Normalization, bins = 15, na.color = "#808080"),
-#             values = ~Normalization,
-#             # labels = c('0%',"","","","","","",'100%'), 
-#             opacity = 0.6,      
-#             title = "Relative<br>Magnitude")
+us_gv.df <- as.data.frame(us_gv.df)
+us_gv.df$state <- as.character(us_gv.df$state)
+us_gv.df$date <- ymd(us_gv.df$date)
 
-# Highcharter Map --------------------------------------------------------------
-# mapdata <- get_data_from_map(download_map_data("countries/us/us-all"))
+names(us_gv.df) <- c("date", "city", "STATE_ABBR", "injured", "killed")
 
-# GV_Count_high <- hcmap("countries/us/us-all", data = state_gv.df, value = "n",
-#       joinBy = c("hc-a2", "STATE_ABBR"), name = "Gun Violence Incidence",
-#       dataLabels = list(enabled = TRUE, format = '{point.name}'),
-#       borderColor = "#FAFAFA", borderWidth = 0.1,
-#       tooltip = list(valueDecimals = 0, valuePrefix = "", valueSuffix = "")) %>% 
-#   hc_chart(zoomType = "xy") %>% 
-#   hc_chart(backgroundColor = "white") %>% 
-#   hc_legend(enabled = F) %>% 
-#   # hc_add_theme(hc_theme_db()) %>% 
-#   hc_title(text = "GVA Deaths In Mass Shootings: 2013 - 2019", align = "left", color = "white") %>% 
-#   hc_exporting(enabled = TRUE, filename = "GV_Map") %>% 
-#   hc_credits(enabled = TRUE, text = "Source: https://www.gunviolencearchive.org/, https://www.massshootingtracker.org/") %>% 
-#   hc_colorAxis(minColor = "white", maxColor = "firebrick", type = "logarithmic")
-# 
-# 
-# # state_gv_norm.df <- merge.data.frame(x = state_gv.df, y = state_pop, by = "STATE_ABBR")
-# # state_gv_norm.df$Normalization <- (state_gv_norm.df$n/state_gv_norm.df$Population) * 100000
-# 
-# 
-# GV_Norm_high <- hcmap("countries/us/us-all", data = state_gv_norm.df, value = "Normalization",
-#                        joinBy = c("hc-a2", "STATE_ABBR"), name = "Gun Violence Incidence",
-#                        dataLabels = list(enabled = TRUE, format = '{point.name}'),
-#                        borderColor = "#FAFAFA", borderWidth = 0.1,
-#                        tooltip = list(valueDecimals = 2, valuePrefix = "", valueSuffix = "")) %>% 
-#   hc_chart(zoomType = "xy") %>% 
-#   hc_chart(backgroundColor = "white") %>% 
-#   hc_legend(enabled = F) %>% 
-#   # hc_add_theme(hc_theme_db()) %>% 
-#   hc_title(text = "GVA Deaths In Mass Shootings: 2013 - 2019", align = "left", color = "white") %>% 
-#   hc_subtitle(text = "Population Normalized", align = "left", color = "white") %>% 
-#   hc_exporting(enabled = TRUE, filename = "GV_Map") %>% 
-#   hc_credits(enabled = TRUE, text = "Source: https://www.gunviolencearchive.org/, https://www.massshootingtracker.org/") %>% 
-#   hc_colorAxis(minColor = "white", maxColor = "firebrick", type = "logarithmic")
+

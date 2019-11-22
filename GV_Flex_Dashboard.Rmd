@@ -25,18 +25,15 @@ dateInput(inputId = "startdate", label = "Select Start Date", value = "2013-01-0
 
 dateInput(inputId = "enddate", label = "Select End Date", value = "2019-12-31",min = "2013-01-01", format = "yyyy-mm-dd")
 
+radioButtons(inputId = "victimtype", label = "Select Victim Type", selected = "Died", choices = c("Died", "Injured"))
+
 ```
 
 
 Column {.tabset .tabset-fade}
 -----------------------------------------------------------------------
 
-### **Interactive Count GV Map**
-
-```{r,echo=FALSE}
-# GV_Count_high
-```
-
+### **GV Count GV Map**
 
 ```{r,echo=FALSE}
 
@@ -47,7 +44,7 @@ renderHighchart({
     tally()
   
     hcmap("countries/us/us-all", value = "n", data = state_gv.df,
-          joinBy = c("hc-a2", "STATE_ABBR"), name = "Gun Violence Incidence",
+          joinBy = c("hc-a2", "STATE_ABBR"), name = "Mass Shooting Count:",
           dataLabels = list(enabled = TRUE, format = '{point.name}'),
           borderColor = "#FAFAFA", borderWidth = 0.1,
           tooltip = list(valueDecimals = 0, valuePrefix = "", valueSuffix = "")) %>% 
@@ -55,7 +52,8 @@ renderHighchart({
     hc_chart(backgroundColor = "white") %>% 
     hc_legend(enabled = F) %>% 
     # hc_add_theme(hc_theme_db()) %>% 
-    hc_title(text = "GVA Deaths In Mass Shootings: 2013 - 2019", align = "left", color = "white") %>% 
+    hc_title(text = paste0("Number of Gun Violence Incidents: ", substr(floor_date(input$startdate, "month"),1,7), " ",
+             " to ", substr(floor_date(input$enddate, "month"),1,7)), align = "left", color = "white") %>% 
     hc_exporting(enabled = TRUE, filename = "GV_Map") %>% 
     hc_credits(enabled = TRUE, text = "Source: https://www.gunviolencearchive.org/, https://www.massshootingtracker.org/") %>% 
     hc_colorAxis(minColor = "white", maxColor = "firebrick", type = "logarithmic")
@@ -65,18 +63,14 @@ renderHighchart({
 
 ```
 
-### **Interactive Normalized GV Map**
-
-```{r,echo=FALSE}
-# GV_Norm_high
-```
+### **Normalized GV Map**
 
 ```{r,echo=FALSE}
 
 
 renderHighchart({
   state_gv.df <- state_gv.df %>% 
-    filter(date >= input$startdate & date <= input$enddate) %>% 
+    filter(date >= input$startdate & date <= input$enddate) %>%
     group_by(STATE_ABBR) %>% 
     tally()
   
@@ -85,7 +79,7 @@ renderHighchart({
   
   
   hcmap("countries/us/us-all", data = state_gv_norm.df, value = "Normalization",
-        joinBy = c("hc-a2", "STATE_ABBR"), name = "Gun Violence Incidence",
+        joinBy = c("hc-a2", "STATE_ABBR"), name = "Shootings per 100k Population:",
         dataLabels = list(enabled = TRUE, format = '{point.name}'),
         borderColor = "#FAFAFA", borderWidth = 0.1,
         tooltip = list(valueDecimals = 2, valuePrefix = "", valueSuffix = "")) %>% 
@@ -93,14 +87,58 @@ renderHighchart({
     hc_chart(backgroundColor = "white") %>% 
     hc_legend(enabled = F) %>% 
     # hc_add_theme(hc_theme_db()) %>% 
-    hc_title(text = "GVA Deaths In Mass Shootings: 2013 - 2019", align = "left", color = "white") %>% 
+    hc_title(text = paste0("GVA Mass Shooting Population Normalized Incidence: ", substr(floor_date(input$startdate, "month"),1,7), " ",
+             " to ", substr(floor_date(input$enddate, "month"),1,7)), align = "left", color = "white") %>% 
     hc_subtitle(text = "Population Normalized", align = "left", color = "white") %>% 
     hc_exporting(enabled = TRUE, filename = "GV_Map") %>% 
     hc_credits(enabled = TRUE, text = "Source: https://www.gunviolencearchive.org/, https://www.massshootingtracker.org/") %>% 
-    hc_colorAxis(minColor = "white", maxColor = "firebrick", type = "logarithmic")
+    hc_colorAxis(minColor = "white", maxColor = "darkorange", type = "logarithmic")
   
 })
 ```
+
+### **Victim Type Map**
+
+```{r,echo=FALSE}
+
+
+renderHighchart({
+  
+  
+  ifelse(input$victimtype == "Died",
+         victim_gv.df <- us_gv.df %>% 
+           filter(date >= input$startdate & date <= input$enddate) %>%
+           group_by(STATE_ABBR) %>% 
+           tally(killed),
+         victim_gv.df <- us_gv.df %>% 
+           filter(date >= input$startdate & date <= input$enddate) %>%
+           group_by(STATE_ABBR) %>% 
+           tally(injured)
+  )
+  
+  # us_gv.df %>% 
+  #   filter(date >= input$startdate & date <= input$enddate) %>%
+  #   group_by(STATE_ABBR) %>% 
+  #   tally(killed)
+  
+  hcmap("countries/us/us-all", value = "n", data = victim_gv.df,
+        joinBy = c("hc-a2", "STATE_ABBR"), name = paste0("No. ", input$victimtype, ":"),
+        dataLabels = list(enabled = TRUE, format = '{point.name}'),
+        borderColor = "#FAFAFA", borderWidth = 0.1,
+        tooltip = list(valueDecimals = 0, valuePrefix = "", valueSuffix = "")) %>% 
+    hc_chart(zoomType = "xy") %>% 
+    hc_chart(backgroundColor = "white") %>% 
+    hc_legend(enabled = F) %>% 
+    # hc_add_theme(hc_theme_db()) %>% 
+    hc_title(text = paste0(input$victimtype ," In Mass Shootings: ", substr(floor_date(input$startdate, "month"),1,7), " ",
+             " to ", substr(floor_date(input$enddate, "month"),1,7)), align = "left", color = "white") %>% 
+    hc_exporting(enabled = TRUE, filename = "GV_Map") %>% 
+    hc_credits(enabled = TRUE, text = "Source: https://www.gunviolencearchive.org/, https://www.massshootingtracker.org/") %>% 
+    hc_colorAxis(minColor = "white", maxColor = "steelblue", type = "logarithmic")
+  
+})
+```
+
 
 Column {data-width=350}
 -----------------------------------------------------------------------
