@@ -1,13 +1,4 @@
-# Load Applicable Libraries ====================================================
-library(shiny)
-library(tidyverse)
-library(rvest)
-library(purrr)
-library(lubridate)
-library(RColorBrewer)
-library(ggplot2)
-library(dplyr)
-library(highcharter)
+
 
 # Year Frames===================================================================
 # Extract all HTML nodes and assign to a dataframe for that year. To save space,
@@ -266,7 +257,7 @@ GVA_Year <- total_gv_df %>%
 # # joining with the GVA database.
 # dfmass$city_county <- gsub("\\s*\\([^\\)]+\\)","",as.character(dfmass$city_county)) 
 
-dfmass <- read.csv("dfmass.csv", fileEncoding = "latin1")
+dfmass <- read.csv("Data_Extraction/dfmass.csv", fileEncoding = "latin1")
 dfmass$date <- mdy(dfmass$date)
 
 # MassST_Year <- dfmass %>% 
@@ -327,7 +318,7 @@ state_gv.df$n <- as.integer(state_gv.df$n) # redefine as an integer type
 
 # http://web.mit.edu/11.520/www/labs/lab5/normalize.html
 # https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html#par_textimage_500989927 
-state_pop <- read.csv("US_Pop_Census_2018.csv")
+state_pop <- read.csv("Data_Extraction/US_Pop_Census_2018.csv")
 
 
 # Victim Type Testing-----------------------------------------------------------

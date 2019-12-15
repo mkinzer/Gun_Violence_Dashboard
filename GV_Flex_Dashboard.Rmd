@@ -9,18 +9,30 @@ runtime: shiny
 ---
 
 ```{r setup, include=FALSE}
+# Load Applicable Libraries ====================================================
+library(shiny)
+library(tidyverse)
+library(rvest)
+library(purrr)
+library(lubridate)
+library(RColorBrewer)
+library(ggplot2)
+library(dplyr)
+library(highcharter)
 library(flexdashboard)
 library(lubridate)
-source("Gun_Violence_Scraping.R")
+library(leaflet)
+source("Data_Extraction/Gun_Violence_Scraping.R")
+source("Data_Extraction/Open_Philly_Data.R")
 ```
 
-Graphics
+United States GV
 =====================================  
 
 Column {.sidebar}
 -----------------------------------------------------------------------
 
-```{r}
+```{r First Input Panel}
 dateInput(inputId = "startdate", label = "Select Start Date", value = "2013-01-01",min = "2013-01-01", format = "yyyy-mm-dd")
 
 dateInput(inputId = "enddate", label = "Select End Date", value = "2019-12-31",min = "2013-01-01", format = "yyyy-mm-dd")
@@ -35,7 +47,7 @@ Column {.tabset .tabset-fade}
 
 ### **GV Count GV Map**
 
-```{r,echo=FALSE}
+```{r US Count Map,echo=FALSE}
 
 renderHighchart({
   state_gv.df <- state_gv.df %>% 
@@ -65,7 +77,7 @@ renderHighchart({
 
 ### **Normalized GV Map**
 
-```{r,echo=FALSE}
+```{r Normalized US Map,echo=FALSE}
 
 
 renderHighchart({
@@ -99,7 +111,7 @@ renderHighchart({
 
 ### **Victim Type Map**
 
-```{r,echo=FALSE}
+```{r US Victim Type Map,echo=FALSE}
 
 
 renderHighchart({
@@ -145,44 +157,116 @@ Column {data-width=350}
 
 ### **Monthly GV Deaths**
 
-```{r,echo=FALSE}
+```{r US Monthly Bar Plot,echo=FALSE}
 GVA_Month
 ```
 
 ### **Yearly GV Deaths**
 
-```{r,echo=FALSE}
+```{r US Yearly Bar PLot,echo=FALSE}
 GVA_Year
 ```
 
+Philadelphia, PA GV
+=====================================  
+
+Column {.sidebar}
+-----------------------------------------------------------------------
+```{r Second Input Panel}
+dateInput(inputId = "startdate2", label = "Select Start Date", value = "2013-01-01",min = "2013-01-01", format = "yyyy-mm-dd")
+
+dateInput(inputId = "enddate2", label = "Select End Date", value = "2019-12-31",min = "2013-01-01", format = "yyyy-mm-dd")
+
+```
+
+Column
+-----------------------------------------------------------------------
+### **Philadelphia Shooting Incidents**
+```{r Philly Map,echo=FALSE}
+
+renderLeaflet({
+
+# Tally the incident numbers for rounded long and lat values
+  philly.gv_round <- philly.gv %>% 
+    filter(date_ >= input$startdate2 & date_ <= input$enddate2) %>% 
+    group_by(lat, lng) %>% 
+    tally()
+  
+  
+  leaflet(data = philly.gv_round) %>% 
+    addProviderTiles(providers$CartoDB.Positron) %>% 
+    setView(lng = -75.16,
+            lat = 39.95,
+            zoom = 13) %>% 
+    # addPopups(lng = ~lng, lat = ~lat, popup = ~as.character(n)) %>%
+    # addMarkers(~lng, ~lat, label = ~as.character(n)) %>%
+    addCircles(lng = ~lng, lat = ~lat, weight = 1,
+               radius = ~sqrt(n)*50, 
+               popup = ~paste(sep = "<br/>", "<b> Number of Incidents:</b>", as.character(n)), 
+               fillColor = ~pal(n), stroke = NA, fillOpacity = 0.8
+    ) %>% 
+    addLegend("bottomright", pal = pal, values = ~n,
+              title = "Shooting Incidents (n)",
+              labFormat = labelFormat(prefix = ""),
+              opacity = 1
+    ) 
+
+})
+```
+
+
 User Guide
 =====================================  
+Column
+-----------------------------------------------------------------------
 ### **Introduction**
-Welcome to the Gun Violence & Mass Shooting Data Tracker dashboard. This dashboard scrapes incident data from both the **[Gun Violence Archive](https://www.gunviolencearchive.org/) (GVA)** and the **[Mass Shooting Tracker](https://www.massshootingtracker.org/) (MST)** and combines them to ensure as many incidents are tracked and verified as possible.** 
+Welcome to the Gun Violence & Mass Shooting Data Tracker dashboard. This dashboard consists of various data displays fed from different data streams.
+
+The **United States GV** tab shows nation-wide data scraped from both the **[Gun Violence Archive](https://www.gunviolencearchive.org/) (GVA)** and the **[Mass Shooting Tracker](https://www.massshootingtracker.org/) (MST)** and combines them to ensure as many incidents are tracked and verified as possible.** 
 
 <span style="color:red">**The MST database is down as of 10-29-2019, to address this all data pulled from it has been saved and frozen. Data displayed that incorporates MST is only recent up to this date, all other data beyond is reliant on GVA.**</span>
+
+The **Philadelphia PA GV** tab scrapes data from **[Open Data Philly](https://www.opendataphilly.org/dataset/shooting-victims)** which is self-branded as "the official open data repository for the City." This tab does not look into "mass shooting" events and instead looks at all reported shooting incidents. 
 
 This tracker is not meant to display bias, and merely serves to give a view of the factual data that exists. 
 
 ### **Assumptions**
+
+**United States GV**:
 The following liberties were taken and definitions made when compiling this dataset:
 
 - The District of Columbia (D.C.) as a standalone district was excluded due to the high incidence per capita. In the normalization graphs D.C. had a density of over 5 which heavily skewed the graph.
 - A “Mass Shooting” is being defined as “a single outburst in which four or more people are shot.” For reference, the FBI defines a "mass murder" as "four or more murdered during an event with no "cooling-off period" between the murders." The definitions have changed over the years and the U.S. acknowledges that there is no agreed upon definition at present.
 - Only data taken from 2013 to the present is accounted for due to a lack of resources from before this year and varying definitions for what constitutes a mass shooting as time has gone on since.
 
+**Philadelphia PA GV**:
+The Philadelphia map takes different considerations into account and does not restrict to only "mass shooting" events, specifically "city-wide shooting victims, including Police Officer-involved shootings."
+
 ### **Techniques**
+**United States GV**:
 Data-normalization was conducted by dividing the number of mass shootings by the total population of the state, multiplied by 100,000. This can therefore be read as “n” incidents per 100,000 people in a given state. This method is in accordance with generally accepted practices as shown in **[MIT’s Department of Urban Studies and Planning](http://web.mit.edu/11.520/www/labs/lab5/normalize.html)**. At the moment, this only takes into account the given years in totality, future efforts will look into incorporating date toggles to limit scope by time.
 
-At the moment the dashboard only reports on descriptive statistics and is not an indicator for predictive analytics
+**Philadelphia PA GV**:
+To decrease map congestion and load times, geospacial coordinates were rounded to the nearest hundredth to group nearby incidents together. Therefore the location is a rough estimate.
 
+Column
+-----------------------------------------------------------------------
 ### **Resources**
+**United States GV**:
 GV incidence reports were taken from a combination of:
 - **[Gun Violence Archive](https://www.gunviolencearchive.org/) (GVA)** 
 - **[Mass Shooting Tracker](https://www.massshootingtracker.org/) (MST)**
 U.S. population estimates were taken from the **[2018 U.S. Census totals]( https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html#par_textimage_500989927)**.
 
-** While the decision was made to use both the GVA and MST databases, there is some controversy over MST use based due to crowd sourced, unfunded Reddit input. However, each entry by users is curated by the sub-forum moderators and require at least 2 sources to link each event to. Since GVA may be considered a gold standard, but contain less information due to rigidity, it was decided to join the two databases together and ensure nothing from GVA was missing, but that MST could supplement. It was found that on combining the databases the total number of entries equaled that of MST alone which indicates that MST picked up every entry of GVA with some additional entries likely due to greater resources and looser definitions.
+**Philadelphia PA GV**:
+- **[Open Data Philly](https://www.opendataphilly.org/dataset/shooting-victims)**
+
+### **Additional Information**
+** While the decision was made to use both the GVA and MST databases, there is some controversy over MST use due to crowd sourced, unfunded Reddit input. However, each entry by users is curated by the sub-forum moderators and require at least 2 sources to link each event to. Since GVA may be considered a gold standard, but contain less information due to rigidity, it was decided to join the two databases together and ensure nothing from GVA was missing, but that MST could supplement. It was found that on combining the databases the total number of entries equaled that of MST alone which indicates that MST picked up every entry of GVA with some additional entries likely due to greater resources and looser definitions.
+
+** At the moment the dashboard only reports on descriptive statistics and is not an indicator for predictive analytics.
+
+** This tracker is not meant to display bias, and merely serves to give a view of the factual data that exists. It is **not** the author's intention to promote or incentivize any type of thinking or political view. 
 
 
 
