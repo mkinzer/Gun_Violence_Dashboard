@@ -22,6 +22,7 @@ library(highcharter)
 library(flexdashboard)
 library(lubridate)
 library(leaflet)
+library(DT)
 source("Data_Extraction/Gun_Violence_Scraping.R")
 source("Data_Extraction/Open_Philly_Data.R")
 ```
@@ -214,6 +215,59 @@ renderLeaflet({
 })
 ```
 
+-----------------------------------------------------------------------
+### **Philadelphia Shooting Incidents - Tabular Data**
+```{r Philly Table,echo=FALSE}
+
+philly.gv %>% 
+  select("Code" = code, "Date" = date_, "Race" = race, "Sex" = sex, "Age" = age,
+         "Wound Location" = wound, "Office Involved" = officer_involved, 
+         "Offender Deceased" = offender_deceased, 
+         "Offender Injured" = offender_injured, "Location" = location,
+         "Latino" = latino, "Inside" = inside, "Outside" = outside, 
+         "Fatal" = fatal) %>% 
+  DT::datatable(class = 'cell-border compact hover stripe', 
+                caption = htmltools::tags$caption(
+                  style = 'caption-side: bottom; text-align: center;',
+                  'Table 1: ', htmltools::em('Shooting incidents in Philadelphia, PA.')
+                ),
+                extensions = 'Buttons', options = list(
+                  dom = 'Bfrtip',
+                  buttons = c('csv')
+                )
+  )
+
+```
+
+Column
+-----------------------------------------------------------------------
+### **Demographic Percentages**
+```{r Philly Perc Plot,echo=FALSE}
+
+renderHighchart({
+
+  philly.gv_perc <- philly.gv %>% 
+    filter(date_ >= input$startdate2 & date_ <= input$enddate2) %>% 
+    mutate("% Latino" = round(sum(latino, na.rm = T)/nrow(philly.gv),4)*100,
+           "% Black" = round(sum(race == "B" | race == "b", na.rm = T)/nrow(philly.gv),4)*100,
+           "% White" = round(sum(race == "W" | race == "w", na.rm = T)/nrow(philly.gv),4)*100,
+           "% Inside" = round(sum(inside, na.rm = T)/nrow(philly.gv),4)*100,
+           "% Outside" = round(sum(outside, na.rm = T)/nrow(philly.gv),4)*100,
+           "% Fatal" = round(sum(fatal, na.rm = T)/nrow(philly.gv),4)*100,
+           "% Officer Involved" = round(sum(officer_involved == "Y", na.rm = T)/nrow(philly.gv),4)*100)
+  
+  philly.gv_perc <- reshape2::melt(philly.gv_perc[1,26:32])
+  colnames(philly.gv_perc) <- c("Variable", "Percentage")
+  
+  hchart(philly.gv_perc, "bar", hcaes(x = Variable, y = Percentage)) %>% 
+    hc_add_theme(hc_theme_smpl()) %>% 
+    hc_tooltip(pointFormat = paste('{point.y}%')) %>%
+    hc_title(text = "Demographic Percentages in Shooting Incidents") %>% 
+    hc_legend(enabled = F)
+
+})
+
+```
 
 User Guide
 =====================================  
