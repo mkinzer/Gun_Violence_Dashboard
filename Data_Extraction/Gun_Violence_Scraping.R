@@ -123,7 +123,7 @@ df2018 <- data.frame(
 )
 
 # 2019 Data ====================================================================
-df2019 <- lapply(paste0("https://www.gunviolencearchive.org/reports/mass-shooting?year=2019&page=", 0:11),
+df2019 <- lapply(paste0("https://www.gunviolencearchive.org/reports/mass-shooting?year=2019&page=", 0:17),
                  function(url){
                    url %>% read_html() %>% 
                      html_nodes("tr td") %>% 

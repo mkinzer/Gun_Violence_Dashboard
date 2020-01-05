@@ -110,7 +110,7 @@ renderHighchart({
 })
 ```
 
-### **Victim Type Map**
+### **Deaths vs Injuries**
 
 ```{r US Victim Type Map,echo=FALSE}
 
@@ -182,7 +182,7 @@ dateInput(inputId = "enddate2", label = "Select End Date", value = "2019-12-31",
 
 Column
 -----------------------------------------------------------------------
-### **Philadelphia Shooting Incidents**
+### **Philadelphia Shooting Incidents Map**
 ```{r Philly Map,echo=FALSE}
 
 renderLeaflet({
@@ -262,7 +262,7 @@ renderHighchart({
   hchart(philly.gv_perc, "bar", hcaes(x = Variable, y = Percentage)) %>% 
     hc_add_theme(hc_theme_smpl()) %>% 
     hc_tooltip(pointFormat = paste('{point.y}%')) %>%
-    hc_title(text = "Demographic Percentages in Shooting Incidents") %>% 
+    # hc_title(text = "Demographic Percentages in Shooting Incidents") %>% 
     hc_legend(enabled = F)
 
 })
@@ -280,7 +280,9 @@ The **United States GV** tab shows nation-wide data scraped from both the **[Gun
 
 <span style="color:red">**The MST database is down as of 10-29-2019, to address this all data pulled from it has been saved and frozen. Data displayed that incorporates MST is only recent up to this date, all other data beyond is reliant on GVA.**</span>
 
-The **Philadelphia PA GV** tab scrapes data from **[Open Data Philly](https://www.opendataphilly.org/dataset/shooting-victims)** which is self-branded as "the official open data repository for the City." This tab does not look into "mass shooting" events and instead looks at all reported shooting incidents. 
+The **Philadelphia PA GV** tab scrapes data from **[Open Data Philly](https://www.opendataphilly.org/dataset/shooting-victims)** which is self-branded as "the official open data repository for the City." This tab does not look into "mass shooting" events and instead looks at all reported shooting incidents. Use the **Philadelphia Shooting Incidents Map** to visually explore the frequency of shootings in different areas of the city. Changes to the date filters in the side column will update accordingly. Larger circles with brighter colors indicate greater frequency of incidents.
+
+The **Demographic Percentages** bar plot illustrates different percentage characteristics related to the anatomy of shooting incidents. Displayed characteristics are in relation to victims. This plot will update with changes to the date filters on the side column, however the **Philadelphia Shooting Incidents – Tabular Data** table will not. Users are welcome to search by specific criteria as well as use the “CSV” button to export a .csv file containing all data. _Please note the data will take time to export and the dashboard may freeze, do not refresh the page during this time_. 
 
 This tracker is not meant to display bias, and merely serves to give a view of the factual data that exists. 
 
