@@ -72,14 +72,11 @@ renderHighchart({
     hc_colorAxis(minColor = "white", maxColor = "firebrick", type = "logarithmic")
   
 })
-
-
 ```
 
 ### **Normalized GV Map**
 
 ```{r Normalized US Map,echo=FALSE}
-
 
 renderHighchart({
   state_gv.df <- state_gv.df %>% 
@@ -113,7 +110,6 @@ renderHighchart({
 ### **Deaths vs Injuries**
 
 ```{r US Victim Type Map,echo=FALSE}
-
 
 renderHighchart({
   
@@ -177,7 +173,6 @@ Column {.sidebar}
 dateInput(inputId = "startdate2", label = "Select Start Date", value = "2013-01-01",min = "2013-01-01", format = "yyyy-mm-dd")
 
 dateInput(inputId = "enddate2", label = "Select End Date", value = "2019-12-31",min = "2013-01-01", format = "yyyy-mm-dd")
-
 ```
 
 Column
@@ -199,8 +194,6 @@ renderLeaflet({
     setView(lng = -75.16,
             lat = 39.95,
             zoom = 13) %>% 
-    # addPopups(lng = ~lng, lat = ~lat, popup = ~as.character(n)) %>%
-    # addMarkers(~lng, ~lat, label = ~as.character(n)) %>%
     addCircles(lng = ~lng, lat = ~lat, weight = 1,
                radius = ~sqrt(n)*50, 
                popup = ~paste(sep = "<br/>", "<b> Number of Incidents:</b>", as.character(n)), 
@@ -236,7 +229,6 @@ philly.gv %>%
                   buttons = c('csv')
                 )
   )
-
 ```
 
 Column
@@ -262,11 +254,28 @@ renderHighchart({
   hchart(philly.gv_perc, "bar", hcaes(x = Variable, y = Percentage)) %>% 
     hc_add_theme(hc_theme_smpl()) %>% 
     hc_tooltip(pointFormat = paste('{point.y}%')) %>%
-    # hc_title(text = "Demographic Percentages in Shooting Incidents") %>% 
     hc_legend(enabled = F)
-
 })
+```
 
+-----------------------------------------------------------------------
+### **Frequency Over Time**
+```{r Philly Time Plot,echo=FALSE}
+
+renderHighchart({
+
+  philly.gv_n <- philly.gv %>% 
+    filter(date_ >= input$startdate2 & date_ <= input$enddate2)
+  
+philly.gv_n %>% 
+  group_by(floor_date(date_, "month")) %>% 
+  tally() %>% 
+  hchart("line", hcaes(x = `floor_date(date_, "month")`, y = n)) %>% 
+  hc_add_theme(hc_theme_smpl()) %>% 
+  hc_tooltip(pointFormat = paste('{point.y}')) %>%
+  hc_xAxis(title = "Time") %>% 
+  hc_legend(enabled = F)
+})
 ```
 
 User Guide
@@ -282,7 +291,7 @@ The **United States GV** tab shows nation-wide data scraped from both the **[Gun
 
 The **Philadelphia PA GV** tab scrapes data from **[Open Data Philly](https://www.opendataphilly.org/dataset/shooting-victims)** which is self-branded as "the official open data repository for the City." This tab does not look into "mass shooting" events and instead looks at all reported shooting incidents. Use the **Philadelphia Shooting Incidents Map** to visually explore the frequency of shootings in different areas of the city. Changes to the date filters in the side column will update accordingly. Larger circles with brighter colors indicate greater frequency of incidents.
 
-The **Demographic Percentages** bar plot illustrates different percentage characteristics related to the anatomy of shooting incidents. Displayed characteristics are in relation to victims. This plot will update with changes to the date filters on the side column, however the **Philadelphia Shooting Incidents – Tabular Data** table will not. Users are welcome to search by specific criteria as well as use the “CSV” button to export a .csv file containing all data. _Please note the data will take time to export and the dashboard may freeze, do not refresh the page during this time_. 
+The **Demographic Percentages** bar plot illustrates different percentage characteristics related to the anatomy of shooting incidents. Displayed characteristics are in relation to victims. This plot, as well as the **Frequency Over Time**, will update with changes to the date filters on the side column, however the **Philadelphia Shooting Incidents – Tabular Data** table will not. Users are welcome to search by specific criteria as well as use the “CSV” button to export a .csv file containing all data. _Please note the data will take time to export and the dashboard may freeze, do not refresh the page during this time_. 
 
 This tracker is not meant to display bias, and merely serves to give a view of the factual data that exists. 
 

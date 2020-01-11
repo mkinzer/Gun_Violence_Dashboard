@@ -14,23 +14,3 @@ pal <- colorNumeric(
   palette = "magma",
   domain = philly.gv$n
 )
-
-# leaflet(data = philly.gv_round) %>% 
-#   addProviderTiles(providers$CartoDB.Positron) %>% 
-#   setView(lng = -75.16,
-#           lat = 39.95,
-#           zoom = 13) %>% 
-#   # addPopups(lng = ~lng, lat = ~lat, popup = ~as.character(n)) %>%
-#   # addMarkers(~lng, ~lat, label = ~as.character(n)) %>%
-#   addCircles(lng = ~lng, lat = ~lat, weight = 1,
-#              radius = ~sqrt(n)*50, 
-#              popup = ~paste(sep = "<br/>", "<b> Number of Incidents:</b>", as.character(n)), 
-#              fillColor = ~pal(n), stroke = NA, fillOpacity = 0.8
-#   ) %>% 
-#   addLegend("bottomright", pal = pal, values = ~n,
-#             title = "Shooting Incidents (n)",
-#             labFormat = labelFormat(prefix = ""),
-#             opacity = 1
-#   ) 
-
-
