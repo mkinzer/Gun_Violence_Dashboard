@@ -46,7 +46,7 @@ radioButtons(inputId = "victimtype", label = "Select Victim Type", selected = "D
 Column {.tabset .tabset-fade}
 -----------------------------------------------------------------------
 
-### **GV Count GV Map**
+### **GV Count Map** 
 
 ```{r US Count Map,echo=FALSE}
 

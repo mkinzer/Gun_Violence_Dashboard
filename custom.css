@@ -1,0 +1,38 @@
+
+
+div span {
+  font-weight: bolder;
+  color: #287CBC;
+  font-family: "Rockwell";
+}
+
+div strong {
+  font-weight: bolder;
+  color: #287CBC;
+  font-family: "Rockwell";
+}
+
+a strong {
+  font-weight: bolder;
+  color: #287CBC;
+  font-family: "Rockwell";
+}
+
+div label {
+  font-weight: lighter;
+  color: #287CBC;
+  font-family: "Rockwell";
+}
+
+label span {
+  font-weight: lighter;
+  color: #BC3A28;
+  font-family: "Rockwell";
+}
+
+
+div strong {
+  font-weight: bolder;
+  color: #BC3A28;
+  font-family: "Rockwell";
+}
