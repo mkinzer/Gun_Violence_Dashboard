@@ -140,10 +140,29 @@ df2019 <- data.frame(
   no.injured = df2019[seq(from = 6, to = length(df2019), by = 7)]
 )
 
+# 2020 Data ====================================================================
+df2020 <- lapply(paste0("https://www.gunviolencearchive.org/reports/mass-shooting?year=2020&page=", 1),
+                 function(url){
+                   url %>% read_html() %>% 
+                     html_nodes("tr td") %>% 
+                     html_text()
+                 })
+df2020 <- unlist(df2020)
+df2020 <- data.frame(
+  #incident_id = df2020[seq(from = 1, to = length(df2020), by = 8)],
+  incident_date = df2020[seq(from = 1, to = length(df2020), by = 7)],
+  state = df2020[seq(from = 2, to = length(df2020), by = 7)],
+  city_county = df2020[seq(from = 3, to = length(df2020), by = 7)],
+  address = df2020[seq(from = 4, to = length(df2020), by = 7)],
+  no.killed = df2020[seq(from = 5, to = length(df2020), by = 7)],
+  no.injured = df2020[seq(from = 6, to = length(df2020), by = 7)]
+)
+
+
 # Combined GV Dataset ==========================================================
 
 # Place all year data frames in a list
-all_years <- list(df2013, df2014, df2015, df2016, df2017, df2018, df2019)
+all_years <- list(df2013, df2014, df2015, df2016, df2017, df2018, df2019, df2020)
 
 # Apply the rbind command to all elements of the list using do.call()
 total_gv_df <- do.call("rbind", all_years)
@@ -229,11 +248,11 @@ GVA_Year <- total_gv_df %>%
 ## NOTE AS OF 10_29_2019 MST lost the domain name and is not functioning
 # dfmass <- lapply(paste0("https://www.massshootingtracker.org/data/all"),
 #                  function(url){
-#                    url %>% read_html() %>% 
-#                      html_nodes("tr td") %>% 
+#                    url %>% read_html() %>%
+#                      html_nodes("tr td") %>%
 #                      html_text()
 #                  })
-# 
+#
 # dfmass <- unlist(dfmass)
 # dfmass <- data.frame(
 #   incident_id = dfmass[seq(from = 1, to = length(dfmass), by = 7)],
@@ -243,9 +262,9 @@ GVA_Year <- total_gv_df %>%
 #   no.injured = dfmass[seq(from = 5, to = length(dfmass), by = 7)],
 #   shooters = dfmass[seq(from = 6, to = length(dfmass), by = 7)]
 # )
-# 
+#
 # dfmass[1] <- NULL
-# 
+#
 # dfmass$city_county <- lapply(strsplit(as.character(dfmass$Location), split = ","),"[[",1)
 # dfmass$state <- lapply(strsplit(as.character(dfmass$Location), split = ","),"[[",2)
 # dfmass$date <- mdy(as.character(dfmass$incident_date))
@@ -253,17 +272,17 @@ GVA_Year <- total_gv_df %>%
 # dfmass$state <- as.character(dfmass$state)
 # dfmass$no.injured <- as.integer(dfmass$no.injured)
 # dfmass$no.killed <- as.integer(dfmass$no.killed)
-# # Remove everything with and inside of parentheses to preserve consistency when 
+# # Remove everything with and inside of parentheses to preserve consistency when
 # # joining with the GVA database.
-# dfmass$city_county <- gsub("\\s*\\([^\\)]+\\)","",as.character(dfmass$city_county)) 
+# dfmass$city_county <- gsub("\\s*\\([^\\)]+\\)","",as.character(dfmass$city_county))
 
 dfmass <- read.csv("Data_Extraction/dfmass.csv", fileEncoding = "latin1")
 dfmass$date <- mdy(dfmass$date)
 
-# MassST_Year <- dfmass %>% 
-#   dplyr::select(date, no.killed) %>% 
-#   group_by(Date = floor_date(x = date, unit = "year")) %>% 
-#   tally(name = "Number of Deaths") %>% 
+# MassST_Year <- dfmass %>%
+#   dplyr::select(date, no.killed) %>%
+#   group_by(Date = floor_date(x = date, unit = "year")) %>%
+#   tally(name = "Number of Deaths") %>%
 #   ggplot(aes(x = Date, y = `Number of Deaths`)) + geom_col(aes(fill = `Number of Deaths`)) +
 #   scale_fill_gradient(low = "blue", high = "red") +
 #   theme_minimal() +
