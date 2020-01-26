@@ -9,7 +9,7 @@ philly.gv$lng <- round(philly.gv$lng,2) # Round longitude and latitude to 2 digi
 philly.gv$lat <- round(philly.gv$lat,2)
 
 
-# Create a continuous palette function
+# Create a continuous palette function for future coloring
 pal <- colorNumeric(
   palette = "magma",
   domain = philly.gv$n

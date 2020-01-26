@@ -16,11 +16,8 @@ library(rvest)
 library(purrr)
 library(lubridate)
 library(RColorBrewer)
-library(ggplot2)
-library(dplyr)
 library(highcharter)
 library(flexdashboard)
-library(lubridate)
 library(leaflet)
 library(DT)
 source("Data_Extraction/Gun_Violence_Scraping.R")
@@ -39,7 +36,6 @@ dateInput(inputId = "startdate", label = "Select Start Date", value = "2013-01-0
 dateInput(inputId = "enddate", label = "Select End Date", value = "2019-12-31",min = "2013-01-01", format = "yyyy-mm-dd")
 
 radioButtons(inputId = "victimtype", label = "Select Victim Type", selected = "Died", choices = c("Died", "Injured"))
-
 ```
 
 

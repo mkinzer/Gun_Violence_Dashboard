@@ -6,7 +6,7 @@
 # order.
 
 # Note that for Years 2016 on there is no incident ID column which must be
-# dropped form the rest once combined
+# dropped from the rest once combined
 
 # 2013 Data ====================================================================
 df2013 <- lapply(paste0("https://www.gunviolencearchive.org/reports/mass-shootings/2013?page=", 0:11),
