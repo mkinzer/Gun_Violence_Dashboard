@@ -33,7 +33,7 @@ Column {.sidebar}
 ```{r First Input Panel}
 dateInput(inputId = "startdate", label = "Select Start Date", value = "2013-01-01",min = "2013-01-01", format = "yyyy-mm-dd")
 
-dateInput(inputId = "enddate", label = "Select End Date", value = "2019-12-31",min = "2013-01-01", format = "yyyy-mm-dd")
+dateInput(inputId = "enddate", label = "Select End Date", value = "2022-12-31",min = "2013-01-01", format = "yyyy-mm-dd")
 
 radioButtons(inputId = "victimtype", label = "Select Victim Type", selected = "Died", choices = c("Died", "Injured"))
 ```
@@ -168,7 +168,7 @@ Column {.sidebar}
 ```{r Second Input Panel}
 dateInput(inputId = "startdate2", label = "Select Start Date", value = "2013-01-01",min = "2013-01-01", format = "yyyy-mm-dd")
 
-dateInput(inputId = "enddate2", label = "Select End Date", value = "2019-12-31",min = "2013-01-01", format = "yyyy-mm-dd")
+dateInput(inputId = "enddate2", label = "Select End Date", value = "2022-12-31",min = "2013-01-01", format = "yyyy-mm-dd")
 ```
 
 Column
