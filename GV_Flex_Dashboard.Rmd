@@ -20,6 +20,12 @@ library(highcharter)
 library(flexdashboard)
 library(leaflet)
 library(DT)
+library(readr)
+# library(RCurl)
+
+# setwd() 
+# options(rsconnect.check.certificate = FALSE)
+
 source("Data_Extraction/Gun_Violence_Scraping.R")
 source("Data_Extraction/Open_Philly_Data.R")
 ```
@@ -180,6 +186,7 @@ renderLeaflet({
 
 # Tally the incident numbers for rounded long and lat values
   philly.gv_round <- philly.gv %>% 
+    filter(!is.na(lat)) %>% 
     filter(date_ >= input$startdate2 & date_ <= input$enddate2) %>% 
     group_by(lat, lng) %>% 
     tally()

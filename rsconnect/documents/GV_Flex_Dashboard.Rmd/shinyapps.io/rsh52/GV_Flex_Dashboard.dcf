@@ -1,0 +1,12 @@
+name: GV_Flex_Dashboard
+title: GV_Flex_Dashboard
+username:
+account: rsh52
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 2382211
+bundleId: 3208389
+url: https://rsh52.shinyapps.io/GV_Flex_Dashboard/
+when: 1590859333.02151
+asMultiple: FALSE
+asStatic: FALSE
